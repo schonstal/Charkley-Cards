@@ -1,0 +1,22 @@
+{
+  "name": "Charkley-Cards",
+  "description": "Make sports",
+  "website": "https://barlescharkley.com/",
+  "repository": "https://github.com/schonstal/chakley-cards",
+  "logo": "https://barlescharkley.com/barles.png",
+  "success_url": "/",
+  "keywords": [
+    "node",
+    "express",
+    "socket.io",
+    "realtime",
+    "websocket"
+  ],
+  "scripts": {
+  },
+  "addons": [
+  ],
+  "env": {
+    "BUILDPACK_URL": "https://github.com/heroku/heroku-buildpack-nodejs"
+  }
+}
