@@ -82,10 +82,10 @@
                 </h2>
               </label>
 
-              <input id="name" class="form-control" required autofocus autocomplete=false>
+              <input id="name" class="form-control" required autofocus autocomplete=false maxlength=16>
             </div>
 
-            <label for="message">
+            <label for="m">
               <h2>
                 Enter a Game Code
               </h2>
@@ -104,11 +104,23 @@
     <script>
       $(function () {
         var socket = io();
+        var room = null;
 
-        $('form').submit(function(){
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
+        $('form').submit(function(e) {
+          let name = $('#name').val();
+          e.preventDefault();
+
+          if (room === null) {
+            room = $('#m').val();
+          }
+
+          socket.emit('join', {
+            channel: room,
+            username: name
+          });
+
           $('form').hide();
+
           return false;
         });
 
