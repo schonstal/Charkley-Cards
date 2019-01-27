@@ -43,12 +43,6 @@ http.listen(port, function(){
   console.log('listening on *:' + port);
 });
 
-/*
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
-  });
-*/
-
 class Channel {
   constructor() {
     this.users = {};
