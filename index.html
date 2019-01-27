@@ -73,7 +73,7 @@
       </h1>
 
       <div class="row text-center">
-        <form action="" class="form-message">
+        <form id="join" action="" class="form-message">
           <div id="controls">
             <div id="nameInput">
               <label for="name">
@@ -98,6 +98,63 @@
             </button>
           </div>
         </form>
+
+        <form id="add-name" action="" class="form-message" style="display: none;">
+          <div id="controls">
+            <div id="nameInput">
+              <label for="card-name">
+                <h2>
+                  Invent a Player Name
+                </h2>
+                You can add as many as you like!
+              </label>
+
+              <input id="card-name" class="form-control" required autofocus autocomplete=false maxlength=16>
+            </div>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">
+              Submit
+            </button>
+          </div>
+        </form>
+
+        <form id="add-flavor" action="" class="form-message" style="display: none;">
+          <div id="controls">
+            <div id="nameInput">
+              <label for="flavor">
+                <h2 id="finisher-title">
+                  A Finishing Touch
+                </h2>
+                <span id="finisher">
+                  Add a quote, position, or lifetime achievement to show on the bottom of the card!
+                </span>
+              </label>
+
+              <input id="flavor" class="form-control" required autofocus autocomplete=false maxlength=16>
+            </div>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">
+              Submit
+            </button>
+          </div>
+        </form>
+
+        <form id="make-cards" action="" class="form-message" style="display: none;">
+          <div id="controls">
+            <div id="nameInput">
+              <label for="flavor">
+                <h2>
+                  Put it together
+                </h2>
+                this part is hard so it does not exist yet
+              </label>
+            </div>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">
+              Reload the page...
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -105,8 +162,23 @@
       $(function () {
         var socket = io();
         var room = null;
+        var items = ['Famous Quote', 'Position', 'Career Highlight', 'Famous Achievement'];
 
-        $('form').submit(function(e) {
+        var changeFinisher = function() {
+          var item = items[Math.floor(Math.random() * items.length)];
+          $('#finisher-title').text(item);
+          $('#finisher').text('Add the player\'s ' + item);
+        };
+
+        changeFinisher();
+
+        socket.on('change_phase', function(phase) {
+          $('form').hide();
+          $('#' + phase).show();
+          $('#' + phase).focus();
+        });
+
+        var onJoin = function(e) {
           let name = $('#name').val();
           e.preventDefault();
 
@@ -119,15 +191,40 @@
             username: name
           });
 
-          $('form').hide();
+          $('#join').hide();
 
           return false;
-        });
+        };
 
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg + ' joined'));
-          window.scrollTo(0, document.body.scrollHeight);
-        });
+        var onAddName = function(e) {
+          let name = $('#card-name').val();
+          $('#card-name').val('');
+          e.preventDefault();
+
+          socket.emit('add_name', name);
+
+          return false;
+        };
+
+        var onAddFlavor = function(e) {
+          let name = $('#flavor').val();
+          $('#flavor').val('');
+          e.preventDefault();
+
+          socket.emit('add_flavor', name);
+
+          changeFinisher();
+          return false;
+        };
+
+        var onMakeCard = function(e) {
+          document.reload();
+        };
+
+        $('#join').submit(onJoin);
+        $('#add-name').submit(onAddName);
+        $('#add-flavor').submit(onAddFlavor);
+        $('#make-cards').submit(onMakeCard);
       });
     </script>
   </body>
