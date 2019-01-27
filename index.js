@@ -30,7 +30,7 @@ io.on('connection', function(socket){
     console.log(`[${new Date()}] ${username} joined game: ${channel}`);
 
     if (channels[channel] === undefined) {
-      channels[channel] = new Channel(channel, 10000);
+      channels[channel] = new Channel(channel);
     }
 
     _channel = channel;
@@ -38,6 +38,8 @@ io.on('connection', function(socket){
     channels[channel].addUser(username, socket);
 
     socket.emit('change_phase', channels[channel].currentPhase);
+
+    channels[channel].startGame(10000);
   });
 });
 
@@ -46,17 +48,10 @@ http.listen(port, function(){
 });
 
 class Channel {
-  constructor(name, gameTime = 30000) {
+  constructor(name) {
     this.users = {};
     this.currentPhase = 'add-name';
     this.name = name;
-
-    setTimeout(() => {
-      this.switchPhase('add-flavor');
-      setTimeout(() => {
-        this.switchPhase('make-cards');
-      }, gameTime);
-    }, gameTime);
   }
 
   addUser(username, socket) {
@@ -71,6 +66,15 @@ class Channel {
     for (const [username, user] of entries) {
       user.socket.emit('change_phase', phase);
     }
+  }
+
+  startGame(gameTime = 30000) {
+    setTimeout(() => {
+      this.switchPhase('add-flavor');
+      setTimeout(() => {
+        this.switchPhase('make-cards');
+      }, gameTime);
+    }, gameTime);
   }
 }
 
