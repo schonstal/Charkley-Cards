@@ -178,6 +178,12 @@
           $('#' + phase).focus();
         });
 
+        socket.on('phrases', function({ names, flavors }) {
+          console.log('got phrases');
+          console.log(names);
+          console.log(flavors);
+        });
+
         var onJoin = function(e) {
           let name = $('#name').val();
           e.preventDefault();
