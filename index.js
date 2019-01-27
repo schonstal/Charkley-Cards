@@ -11,13 +11,18 @@ app.get('/', function(req, res){
 });
 
 io.on('connection', function(socket){
-  let channelName = null;
+  let _channel = null;
+  let _username = null;
 
   socket.on('add_name', function({ username, name }) {
+    channels[_channel].users[_username].addName(name);
+
     console.log(`${username} submitted name ${name}`);
   });
 
   socket.on('add_flavor', function({ username, flavor }) {
+    channels[_channel].users[_username].addFlavor(flavor);
+
     console.log(`${username} submitted flavor ${flavor}`);
   });
 
@@ -28,7 +33,8 @@ io.on('connection', function(socket){
       channels[channel] = new Channel();
     }
 
-    channelName = channel;
+    _channel = channel;
+    _username = username;
     channels[channel].addUser(username);
   });
 });
@@ -60,5 +66,13 @@ class User {
     this.score = 0;
     this.nameSubmissions = [];
     this.flavorSubmissions = [];
+  }
+
+  addName(name) {
+    this.nameSubmissions.push(name);
+  }
+
+  addFlavor(flavor) {
+    this.flavorSubmissions.push(flavor);
   }
 }
