@@ -69,7 +69,9 @@
   <body>
     <div class="container">
       <h1 class="text-center">
-        Barles Charkley's Home Team Trade Club
+        <span class="room-name">
+          Barles Charkley's Home Team Trade Club
+        </span>
       </h1>
 
       <div class="row text-center">
@@ -91,7 +93,7 @@
               </h2>
             </label>
 
-            <input id="m" class="form-control" required autofocus autocomplete=false>
+            <input id="m" class="form-control" required autofocus autocomplete=false maxlength=4>
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">
               Join Game
@@ -142,11 +144,25 @@
         <form id="make-cards" action="" class="form-message" style="display: none;">
           <div id="controls">
             <div id="nameInput">
-              <label for="flavor">
+              <label for="final-name">
                 <h2>
-                  Put it together
+                  Pick the card name!
                 </h2>
-                this part is hard so it does not exist yet
+              </label>
+              <select id="final-name" class="custom-select">
+              </select>
+              <label for="final-flavor">
+                <h2>
+                  Pick the card text!
+                </h2>
+              </label>
+              <select id="final-flavor" class="custom-select">
+              </select>
+
+              <label for="final-image">
+                <h2>
+                  Pick the portrait!
+                </h2>
               </label>
             </div>
 
@@ -154,6 +170,21 @@
               Reload the page...
             </button>
           </div>
+        </form>
+
+        <form id="time-up" style="display: none;">
+          <h1>Waiting for next round...</h1>
+        </form>
+
+        <form id="start-game" style="display: none;">
+          <label for="seconds">
+            <h2>Is everyone is ready to start?</h2>
+            <span>How many seconds per round?</span>
+          </label>
+          <input id="seconds" class="form-control" type=number required autofocus autocomplete=false max=120 min=1 value=60>
+          <button class="btn btn-lg btn-primary btn-block" type="submit">
+            Start Game (everyone's ready!)
+          </button>
         </form>
       </div>
     </div>
@@ -182,6 +213,18 @@
           console.log('got phrases');
           console.log(names);
           console.log(flavors);
+
+          for (var i = 0; i < names.length; i++) {
+            $('#final-name').append(
+              $("<option>").attr('value', names[i].name).text(names[i].name)
+            );
+          }
+
+          for (var j = 0; j < flavors.length; j++) {
+            $('#final-flavor').append(
+              $("<option>").attr('value', flavors[j].flavor).text(flavors[j].flavor)
+            );
+          }
         });
 
         var onJoin = function(e) {
@@ -189,7 +232,7 @@
           e.preventDefault();
 
           if (room === null) {
-            room = $('#m').val();
+            room = $('#m').val().toUpperCase();
           }
 
           socket.emit('join', {
@@ -198,6 +241,7 @@
           });
 
           $('#join').hide();
+          $('.room-name').text('Room Code: ' + room);
 
           return false;
         };
@@ -227,10 +271,19 @@
           document.reload();
         };
 
+        var onStartGame = function(e) {
+          e.preventDefault();
+
+          socket.emit('start_game', { channel: room, round_time: $('#seconds').val() * 1000 });
+
+          return false;
+        };
+
         $('#join').submit(onJoin);
         $('#add-name').submit(onAddName);
         $('#add-flavor').submit(onAddFlavor);
         $('#make-cards').submit(onMakeCard);
+        $('#start-game').submit(onStartGame);
       });
     </script>
   </body>

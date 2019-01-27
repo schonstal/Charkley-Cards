@@ -37,9 +37,11 @@ io.on('connection', function(socket) {
     _username = username;
     channels[channel].addUser(username, socket);
 
-    socket.emit('change_phase', channels[channel].currentPhase);
+    socket.emit('change_phase', 'start-game');
+  });
 
-    channels[channel].startGame(10000);
+  socket.on('start_game', function({ channel, round_time }) {
+    channels[channel].startGame(round_time);
   });
 });
 
@@ -62,6 +64,7 @@ class Channel {
     this.name = name;
     this.nameSubmissions = {};
     this.flavorSubmissions = {};
+    this.started = false;
   }
 
   addUser(username, socket) {
@@ -79,6 +82,11 @@ class Channel {
   }
 
   startGame(gameTime = 30000) {
+    if (this.started) return;
+    this.started = true;
+
+    this.switchPhase('add-name');
+
     setTimeout(() => {
       this.switchPhase('add-flavor');
       setTimeout(() => {
@@ -92,25 +100,32 @@ class Channel {
     let availableNames = Object.assign({}, this.nameSubmissions);
     let availableFlavors = Object.assign({}, this.flavorSubmissions);
 
+    let names = [];
+    let flavors = [];
+
     let entries = Object.entries(this.users);
-    for (const [username, user] of entries) {
-      let names = [];
-      let flavors = [];
+    for (let [username, user] of entries) {
+      names = [];
+      flavors = [];
 
       for (let i = 0; i < 3; i++) {
         let name = randomProperty(availableNames);
-        delete availableNames[name.key];
-        names.push({
-          username: name.property,
-          name: name.key
-        });
+        if (name.key !== undefined) {
+          delete availableNames[name.key];
+          names.push({
+            username: name.property,
+            name: name.key
+          });
+        }
 
         let flavor = randomProperty(availableFlavors);
-        delete availableFlavors[flavor.key];
-        flavors.push({
-          username: flavor.property,
-          flavor: flavor.key
-        });
+        if (flavor.key !== undefined) {
+          delete availableFlavors[flavor.key];
+          flavors.push({
+            username: flavor.property,
+            flavor: flavor.key
+          });
+        }
       }
 
       user.socket.emit('phrases', { names, flavors });
