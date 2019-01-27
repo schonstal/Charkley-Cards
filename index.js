@@ -17,7 +17,7 @@ io.on('connection', function(socket){
   socket.on('add_name', function(name) {
     channels[_channel].users[_username].addName(name);
 
-    console.log(`[${new Date()} ${_username} submitted name ${name} to ${_channel}`);
+    console.log(`[${new Date()}] ${_username} submitted name ${name} to ${_channel}`);
   });
 
   socket.on('add_flavor', function(flavor) {
