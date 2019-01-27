@@ -66,36 +66,52 @@
     <title>Barles Charkley's Home Team Trade Club</title>
   </head>
 
-  <body class="text-center">
-    <form action="" class="form-message">
-      <h1 class="mb-4">
+  <body>
+    <div class="container">
+      <h1 class="text-center">
         Barles Charkley's Home Team Trade Club
       </h1>
 
-      <div id="controls">
-        <label for="m">
-          <h2>
-            Enter a Game Code
-          </h2>
-        </label>
+      <div class="row text-center">
+        <form action="" class="form-message">
+          <div id="controls">
+            <div id="nameInput">
+              <label for="name">
+                <h2>
+                  Enter a Name
+                </h2>
+              </label>
 
-        <input id="m" class="form-control" required autofocus autocomplete="false">
+              <input id="name" class="form-control" required autofocus autocomplete=false>
+            </div>
 
-        <button class="btn btn-lg btn-primary btn-block" type="submit">
-          Join Game
-        </button>
+            <label for="message">
+              <h2>
+                Enter a Game Code
+              </h2>
+            </label>
+
+            <input id="m" class="form-control" required autofocus autocomplete=false>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">
+              Join Game
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
 
     <script>
       $(function () {
         var socket = io();
+
         $('form').submit(function(){
           socket.emit('chat message', $('#m').val());
           $('#m').val('');
           $('form').hide();
           return false;
         });
+
         socket.on('chat message', function(msg){
           $('#messages').append($('<li>').text(msg + ' joined'));
           window.scrollTo(0, document.body.scrollHeight);
