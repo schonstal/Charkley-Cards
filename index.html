@@ -167,7 +167,7 @@
             </div>
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">
-              Reload the page...
+              Submit!
             </button>
           </div>
         </form>
@@ -179,11 +179,19 @@
         <form id="start-game" style="display: none;">
           <label for="seconds">
             <h2>Is everyone is ready to start?</h2>
-            <span>How many seconds per round?</span>
+            <span>How many seconds per round? (Recommended: 60)</span>
           </label>
           <input id="seconds" class="form-control" type=number required autofocus autocomplete=false max=120 min=1 value=60>
           <button class="btn btn-lg btn-primary btn-block" type="submit">
             Start Game (everyone's ready!)
+          </button>
+        </form>
+
+        <form id="evaluate" style="display: none;">
+          <h2>Appraise it!</h2>
+          <span>Press it as many times as you want!.</span>
+          <button class="btn btn-lg btn-primary btn-block" type="submit">
+            💯
           </button>
         </form>
       </div>
@@ -268,7 +276,14 @@
         };
 
         var onMakeCard = function(e) {
-          document.reload();
+          socket.emit('add_card', {
+            name: $('#final-name').val(),
+            flavor: $('#final-flavor').val()
+          });
+
+          $('#make-cards').hide();
+          $('#time-up').show();
+          return false;
         };
 
         var onStartGame = function(e) {
@@ -279,11 +294,26 @@
           return false;
         };
 
+        var onEvaluate = function(e) {
+          e.preventDefault();
+
+          socket.emit('evaluate');
+
+          return false;
+        };
+
         $('#join').submit(onJoin);
         $('#add-name').submit(onAddName);
         $('#add-flavor').submit(onAddFlavor);
         $('#make-cards').submit(onMakeCard);
         $('#start-game').submit(onStartGame);
+        $('#evaluate').submit(onEvaluate);
+
+        $('button').on('mousedown', 
+            function(event) {
+                event.preventDefault();
+            }
+        );
       });
     </script>
   </body>

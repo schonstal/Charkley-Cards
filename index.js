@@ -9,7 +9,7 @@ const sockets = {};
 
 function generateCode() {
   let id = "";
-  let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   for (let i = 0; i < 4; i++) {
     id += letters.charAt(Math.floor(Math.random() * letters.length));
@@ -61,12 +61,20 @@ io.on('connection', function(socket) {
     channels[channel].startGame(round_time);
   });
 
+  socket.on('add_card', function({ name, flavor }) {
+    channels[_channel].addCard({ name, flavor });
+  });
+
   socket.on('register_screen', function() {
     if (channels[channel] === undefined) {
       channels[channel] = new Channel(channel);
     }
 
     channels[channel].registerScreen(socket);
+  });
+
+  socket.on('evaluate', function() {
+    console.log('evaluated');
   });
 });
 
@@ -90,6 +98,15 @@ class Channel {
     this.nameSubmissions = {};
     this.flavorSubmissions = {};
     this.started = false;
+    this.cards = [];
+  }
+
+  addCard({ name, flavor }) {
+    this.cards.push({
+      name,
+      flavor,
+      author: this.nameSubmissions[name]
+    });
   }
 
   registerScreen(socket) {
@@ -108,6 +125,10 @@ class Channel {
     for (const [username, user] of entries) {
       user.socket.emit('change_phase', phase);
     }
+
+    if (sockets[this.name] !== undefined) {
+      io.to(sockets[this.name].id).emit('change_phase', { phase });
+    }
   }
 
   startGame(gameTime = 30000) {
@@ -121,6 +142,12 @@ class Channel {
       setTimeout(() => {
         this.switchPhase('make-cards');
         this.sendPhrases();
+        setTimeout(() => {
+          this.switchPhase('evaluate');
+          if (sockets[this.name] !== undefined) {
+            io.to(sockets[this.name].id).emit('cards', { cards: this.cards });
+          }
+        }, gameTime);
       }, gameTime);
     }, gameTime);
   }
