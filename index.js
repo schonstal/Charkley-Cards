@@ -3,8 +3,20 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
 
-let users = {};
-let channels = {};
+const users = {};
+const channels = {};
+const sockets = {};
+
+function generateCode() {
+  let id = "";
+  let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  for (let i = 0; i < 4; i++) {
+    id += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+
+  return id;
+}
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
@@ -13,6 +25,11 @@ app.get('/', function(req, res) {
 io.on('connection', function(socket) {
   let _channel = null;
   let _username = null;
+  let _code = generateCode();
+
+  sockets[_code] = socket;
+  console.log(`code: ${_code}`);
+  socket.emit('set_code', { code: _code });
 
   socket.on('add_name', function(name) {
     channels[_channel].addName(_username, name);
@@ -43,6 +60,14 @@ io.on('connection', function(socket) {
   socket.on('start_game', function({ channel, round_time }) {
     channels[channel].startGame(round_time);
   });
+
+  socket.on('register_screen', function() {
+    if (channels[channel] === undefined) {
+      channels[channel] = new Channel(channel);
+    }
+
+    channels[channel].registerScreen(socket);
+  });
 });
 
 http.listen(port, function() {
@@ -65,6 +90,10 @@ class Channel {
     this.nameSubmissions = {};
     this.flavorSubmissions = {};
     this.started = false;
+  }
+
+  registerScreen(socket) {
+    this.screenSocket = socket;
   }
 
   addUser(username, socket) {
