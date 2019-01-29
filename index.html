@@ -132,7 +132,7 @@
                 </span>
               </label>
 
-              <input id="flavor" class="form-control" required autofocus autocomplete=false maxlength=16>
+              <input id="flavor" class="form-control" required autofocus autocomplete=false maxlength=40>
             </div>
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">
@@ -158,12 +158,6 @@
               </label>
               <select id="final-flavor" class="custom-select">
               </select>
-
-              <label for="final-image">
-                <h2>
-                  Pick the portrait!
-                </h2>
-              </label>
             </div>
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">
@@ -179,9 +173,9 @@
         <form id="start-game" style="display: none;">
           <label for="seconds">
             <h2>Is everyone is ready to start?</h2>
-            <span>How many seconds per round? (Recommended: 60)</span>
+            <span>How many seconds per round? (Recommended: 30)</span>
           </label>
-          <input id="seconds" class="form-control" type=number required autofocus autocomplete=false max=120 min=1 value=60>
+          <input id="seconds" class="form-control" type=number required autofocus autocomplete=false max=120 min=1 value=30>
           <button class="btn btn-lg btn-primary btn-block" type="submit">
             Start Game (everyone's ready!)
           </button>
@@ -193,6 +187,10 @@
           <button class="btn btn-lg btn-primary btn-block" type="submit">
             💯
           </button>
+        </form>
+
+        <form id="game-over" style="display: none;">
+          <h2>Game Over!</h2>
         </form>
       </div>
     </div>

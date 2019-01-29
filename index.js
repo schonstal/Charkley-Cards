@@ -62,7 +62,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('add_card', function({ name, flavor }) {
-    channels[_channel].addCard({ name, flavor });
+    channels[_channel].addCard({ name, flavor, author: _username });
   });
 
   socket.on('register_screen', function() {
@@ -74,7 +74,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('evaluate', function() {
-    console.log('evaluated');
+    channels[_channel].evaluate(_username);
   });
 });
 
@@ -101,12 +101,26 @@ class Channel {
     this.cards = [];
   }
 
-  addCard({ name, flavor }) {
+  addCard({ name, flavor, author }) {
     this.cards.push({
       name,
       flavor,
-      author: this.nameSubmissions[name]
+      author
     });
+  }
+
+  evaluate() {
+    if (this.activeCard === undefined) {
+      return;
+    }
+
+    let user = this.users[this.activeCard.author];
+    if (user.score === undefined) {
+      user.score = 0;
+    }
+
+    user.score += 100;
+    this.emitToScreen('evaluated', { value: user.score });
   }
 
   registerScreen(socket) {
@@ -126,8 +140,12 @@ class Channel {
       user.socket.emit('change_phase', phase);
     }
 
+    this.emitToScreen('change_phase', { phase });
+  }
+
+  emitToScreen(event, data) {
     if (sockets[this.name] !== undefined) {
-      io.to(sockets[this.name].id).emit('change_phase', { phase });
+      io.to(sockets[this.name].id).emit(event, data);
     }
   }
 
@@ -152,13 +170,31 @@ class Channel {
 
   startEvaluate() {
     this.activeCard = this.cards.pop();
-    if (sockets[this.name] !== undefined) {
-      io.to(sockets[this.name].id).emit('show_card', { card: this.activeCard });
-    }
+    this.emitToScreen('show_card', { card: this.activeCard });
+    this.emitToScreen('evaluated', { value: 0 });
 
     if (this.cards.length > 0) {
       setTimeout(() => this.startEvaluate(), 10000);
+    } else {
+      setTimeout(() => {
+        this.emitToScreen('winner', { name: this.findWinner() });
+        this.switchPhase('game-over');
+      }, 10000);
     }
+  }
+
+  findWinner() {
+    let winner = "";
+    let max = -1;
+
+    let entries = Object.entries(this.users);
+    for (const [username, user] of entries) {
+      if (user.score > max) {
+        winner = username;
+      }
+    }
+
+    return winner;
   }
 
   sendPhrases() {
