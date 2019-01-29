@@ -144,12 +144,21 @@ class Channel {
         this.sendPhrases();
         setTimeout(() => {
           this.switchPhase('evaluate');
-          if (sockets[this.name] !== undefined) {
-            io.to(sockets[this.name].id).emit('cards', { cards: this.cards });
-          }
+          this.startEvaluate();
         }, gameTime);
       }, gameTime);
     }, gameTime);
+  }
+
+  startEvaluate() {
+    this.activeCard = this.cards.pop();
+    if (sockets[this.name] !== undefined) {
+      io.to(sockets[this.name].id).emit('show_card', { card: this.activeCard });
+    }
+
+    if (this.cards.length > 0) {
+      setTimeout(() => this.startEvaluate(), 10000);
+    }
   }
 
   sendPhrases() {
